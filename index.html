@@ -1,0 +1,493 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi horario · AU 2026</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--line:#e2e5ec;--txt:#1b1f2a;--mut:#6b7280;--grid:#eceef3}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1117;--panel:#171a23;--line:#2a2f3d;--txt:#e7e9ee;--mut:#9aa2b1;--grid:#1e2230}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px}
+header{padding:18px 22px 10px;max-width:1200px;margin:0 auto}
+h1{margin:0 0 3px;font-size:20px}
+.sub{color:var(--mut);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 4px}
+.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut)}
+.lg .dot{width:10px;height:10px;border-radius:50%}
+.lg .labkey{width:16px;height:12px;border-radius:3px;border:2px dashed var(--mut);
+  background:repeating-linear-gradient(45deg,transparent,transparent 3px,var(--grid) 3px,var(--grid) 6px)}
+main{max-width:1200px;margin:0 auto;padding:8px 22px 60px}
+.day{margin:22px 0 30px}
+.day h2{font-size:15px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px}
+.dchip{background:var(--txt);color:var(--bg);padding:3px 11px;border-radius:8px;font-size:14px}
+.dsub{color:var(--mut);font-weight:400;font-size:12.5px}
+.cal{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gutter{position:absolute;top:0;bottom:0;left:0;width:60px;border-right:1px solid var(--line);background:var(--panel)}
+.gl{position:absolute;left:60px;right:0;height:1px;background:var(--grid)}
+.gl.maj{background:var(--line)}
+.tl{position:absolute;left:0;width:56px;text-align:right;font-size:10px;color:var(--mut);font-variant-numeric:tabular-nums}
+.track{position:absolute;top:0;bottom:0;left:60px;right:6px}
+.ev{position:absolute;background:color-mix(in srgb,var(--c) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--c) 45%,var(--panel));
+  border-left:4px solid var(--c);border-radius:8px;padding:4px 7px;overflow:hidden;font-size:11px;line-height:1.25;cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.ev:hover{border-color:var(--c);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.ev:active{transform:scale(.99)}
+.ev::after{content:"›";position:absolute;right:5px;bottom:2px;color:var(--c);font-weight:700;opacity:.5;font-size:13px}
+.ev.lab{border:2px dashed var(--c);border-left:5px solid var(--c);
+  background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--c) 16%,var(--panel)),color-mix(in srgb,var(--c) 16%,var(--panel)) 9px,color-mix(in srgb,var(--c) 9%,var(--panel)) 9px,color-mix(in srgb,var(--c) 9%,var(--panel)) 18px)}
+.labbadge{display:inline-block;background:var(--c);color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.4px;
+  padding:1px 6px;border-radius:5px;margin-bottom:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.et{font-weight:700;font-size:10px;color:var(--c);white-space:nowrap}
+.et .st{color:#d97706}
+.ett{font-weight:600;font-size:11px;margin:1px 0;color:var(--txt);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.em{color:var(--mut);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{color:var(--mut);font-size:12px;margin-top:6px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:100;padding:0}
+.ov.on{display:flex}
+.modal{background:var(--panel);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;
+  border:1px solid var(--line);padding:18px 20px 26px;box-shadow:0 -8px 40px rgba(0,0,0,.3)}
+@media(min-width:640px){.ov{align-items:center}.modal{border-radius:16px}}
+.mbar{width:40px;height:4px;background:var(--line);border-radius:3px;margin:0 auto 12px}
+.mtop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.mtag{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.mtag .dot{width:9px;height:9px;border-radius:50%}
+.mstar{color:#d97706;font-weight:700;font-size:13px}
+.mtitle{font-size:18px;font-weight:700;line-height:1.3;margin:4px 0 6px}
+.mmeta{color:var(--mut);font-size:13px;margin-bottom:12px}
+.mdesc{font-size:14px;line-height:1.55;color:var(--txt)}
+.mclose{position:sticky;top:0;float:right;border:0;background:var(--grid);color:var(--txt);width:30px;height:30px;
+  border-radius:50%;font-size:16px;cursor:pointer;line-height:1}
+@media print{body{background:#fff} .cal{break-inside:avoid} .ev{-webkit-print-color-adjust:exact;print-color-adjust:exact} .ev::after{display:none} .ov{display:none!important}}
+</style></head><body>
+<header>
+  <h1>Mi horario · Autodesk University 2026</h1>
+  <div class="sub">San Diego · 75 sesiones elegidas · 13 Hands-on Lab · las que coinciden en hora se reparten en columnas</div>
+  <div class="legend"><span class="lg"><span class="dot" style="background:#8b5cf6"></span>IA &amp; Automatización</span><span class="lg"><span class="dot" style="background:#22c55e"></span>Sostenibilidad &amp; Rendimiento</span><span class="lg"><span class="dot" style="background:#06b6d4"></span>Diseño Conceptual / Forma</span><span class="lg"><span class="dot" style="background:#6366f1"></span>Computacional &amp; Generativo</span><span class="lg"><span class="dot" style="background:#f97316"></span>BIM &amp; Revit</span><span class="lg"><span class="dot" style="background:#0ea5e9"></span>Datos, Cloud &amp; Digital Twins</span><span class="lg"><span class="dot" style="background:#ec4899"></span>Industrializado &amp; Fabricación</span><span class="lg"><span class="labkey"></span>Hands-on Lab (borde a rayas)</span></div>
+  <div class="note">Toca / haz clic en cualquier bloque para ver la descripción completa. ★ recomendada · ★★ muy recomendada.</div>
+</header>
+<main>
+<section class="day">
+      <h2><span class="dchip">Martes 15</span> <span class="dsub">23 sesiones · Tuesday Sep 15</span></h2>
+      <div class="cal" style="height:612px">
+        <div class="gutter"></div>
+        <div class="gl " style="top:0px"></div><div class="tl" style="top:-6px">11:30 AM</div><div class="gl maj" style="top:51px"></div><div class="tl" style="top:45px">12:00 PM</div><div class="gl " style="top:102px"></div><div class="tl" style="top:96px">12:30 PM</div><div class="gl maj" style="top:153px"></div><div class="tl" style="top:147px">1:00 PM</div><div class="gl " style="top:204px"></div><div class="tl" style="top:198px">1:30 PM</div><div class="gl maj" style="top:255px"></div><div class="tl" style="top:249px">2:00 PM</div><div class="gl " style="top:306px"></div><div class="tl" style="top:300px">2:30 PM</div><div class="gl maj" style="top:357px"></div><div class="tl" style="top:351px">3:00 PM</div><div class="gl " style="top:408px"></div><div class="tl" style="top:402px">3:30 PM</div><div class="gl maj" style="top:459px"></div><div class="tl" style="top:453px">4:00 PM</div><div class="gl " style="top:510px"></div><div class="tl" style="top:504px">4:30 PM</div><div class="gl maj" style="top:561px"></div><div class="tl" style="top:555px">5:00 PM</div><div class="gl " style="top:612px"></div><div class="tl" style="top:606px">5:30 PM</div>
+        <div class="track"><div class="ev lab" data-i="0" style="top:0px;height:150px;left:calc(83.3333% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">11:30 AM–1:00 PM · <b class=st>★★</b></div>
+          <div class="ett">Autodesk Tandem Connect in Action: Integrate Systems, Trigger Workflows, Drive Operations</div>
+          <div class="em">[BLD1522] · Hands-on Lab</div>
+        </div><div class="ev" data-i="1" style="top:0px;height:48px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#6366f1">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">From Model to Diagram: Automating Electrical One-Line Generation in Revit</div>
+          <div class="em">[BES1043] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="2" style="top:0px;height:48px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">11:30 AM–12:00 PM · <b class=st>★</b></div>
+          <div class="ett">Design Requirements Verification with BIM Automation and AI Agents</div>
+          <div class="em">[BLD3171] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="3" style="top:0px;height:48px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">11:30 AM–12:00 PM · <b class=st>★</b></div>
+          <div class="ett">Design Once, Use Forever: Automating Civil 3D Asset Data for Operations</div>
+          <div class="em">[CES3746] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="4" style="top:0px;height:48px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#22c55e">
+          
+          <div class="et">11:30 AM–12:00 PM · <b class=st>★★</b></div>
+          <div class="ett">Using Autodesk Forma Takeoff for Carbon Offset and Sustainability Requirements</div>
+          <div class="em">[CS1256] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="5" style="top:0px;height:48px;left:calc(66.6667% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">Rule-Driven Building Design: Connecting Structural Analysis, Autodesk Forma, and Informed Design</div>
+          <div class="em">[FAB2066] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="6" style="top:102px;height:48px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">Data Center Design Automation: A New Paradigm for Feasibility and Early Design</div>
+          <div class="em">[BLD4108] · Strategy Talk</div>
+        </div><div class="ev" data-i="7" style="top:102px;height:48px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">AutoCAD Electrical Meets Vibe Coding: Building a Complex Dashboard Without DAX/M Expertise</div>
+          <div class="em">[CES1396] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="8" style="top:102px;height:48px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#22c55e">
+          
+          <div class="et">12:30 PM–1:00 PM · <b class=st>★★</b></div>
+          <div class="ett">From Pilot to Competitive Advantage: Scaling Generative Design with Autodesk Forma and Infraspace</div>
+          <div class="em">[CES2548] · Strategy Talk</div>
+        </div><div class="ev" data-i="9" style="top:204px;height:99px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Building Custom AEC Apps in Minutes: AI-Assisted Development with FORMA and VIKTOR.AI</div>
+          <div class="em">[BES1377] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="10" style="top:204px;height:99px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Shift to Next-Generation Construction: From Connected Processes to Predictive Decision Making</div>
+          <div class="em">[BLD2378] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="11" style="top:204px;height:99px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">1:30 PM–2:30 PM · <b class=st>★</b></div>
+          <div class="ett">​From Chaos to Control: Model Coordination in Autodesk Forma and API Strategies for Infrastructure Projects</div>
+          <div class="em">[CES1044] · Strategy Talk</div>
+        </div><div class="ev" data-i="12" style="top:204px;height:99px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">1:30 PM–2:30 PM · <b class=st>★</b></div>
+          <div class="ett">Why AI Struggles in Real-World Making—And How to Make It Work</div>
+          <div class="em">[MFG3902] · Strategy Talk</div>
+        </div><div class="ev lab" data-i="13" style="top:255px;height:150px;left:calc(66.6667% + 2px);width:calc(16.6667% - 4px);--c:#6366f1">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">2:00 PM–3:30 PM </div>
+          <div class="ett">Pipe Design in InfoWorks ICM: Penalty Configuration and Automatic Constraint Relaxation</div>
+          <div class="em">[BES2113] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="14" style="top:255px;height:150px;left:calc(83.3333% + 2px);width:calc(16.6667% - 4px);--c:#6366f1">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">2:00 PM–3:30 PM </div>
+          <div class="ett">Design-Driven Reinforcement in Revit: From Analysis Results to Automated Rebar and Documentation</div>
+          <div class="em">[BLD2116] · Hands-on Lab</div>
+        </div><div class="ev" data-i="15" style="top:357px;height:48px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–3:30 PM </div>
+          <div class="ett">Preparing Construction Data for AI</div>
+          <div class="em">[CS2111] · Strategy Talk</div>
+        </div><div class="ev" data-i="16" style="top:357px;height:99px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–4:00 PM · <b class=st>★</b></div>
+          <div class="ett">From Massing to Metrics: Integrating Autodesk Forma and Autodesk Forma Carbon Insights for Outcome-Based Design</div>
+          <div class="em">[AS1983] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="17" style="top:357px;height:99px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–4:00 PM </div>
+          <div class="ett">Create Your Own AI Assistant That Interacts with Revit and Other Programs at the Same Time</div>
+          <div class="em">[BLD2228] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="18" style="top:357px;height:99px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">3:00 PM–4:00 PM </div>
+          <div class="ett">Perfect Quality Control with Autodesk Forma Construction Connect: How Integrated Data Delivers a 45% Workload Reduction</div>
+          <div class="em">[CS1840] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="19" style="top:459px;height:99px;left:calc(0.0000% + 2px);width:calc(25.0000% - 4px);--c:#06b6d4">
+          
+          <div class="et">4:00 PM–5:00 PM </div>
+          <div class="ett">Go Slow to Go Fast: Dome Construction’s Real-World</div>
+          <div class="em">[CS1767] · Roadmap</div>
+        </div><div class="ev" data-i="20" style="top:510px;height:99px;left:calc(25.0000% + 2px);width:calc(25.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">Files to Intelligence: An Autodesk Platform Services-Governed MEP Automation Ecosystem</div>
+          <div class="em">[BLD2290] · Strategy Talk</div>
+        </div><div class="ev" data-i="21" style="top:510px;height:99px;left:calc(50.0000% + 2px);width:calc(25.0000% - 4px);--c:#6366f1">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">Cracking the Code: Automating Block Editor Workflows with DocumentManager CommandAsync</div>
+          <div class="em">[CES1589] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="22" style="top:510px;height:99px;left:calc(75.0000% + 2px);width:calc(25.0000% - 4px);--c:#ec4899">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">Reliable Techniques for Complex Drawings and Detailing in Inventor</div>
+          <div class="em">[IM1095] · Technical Deep Dive</div>
+        </div></div>
+      </div>
+    </section><section class="day">
+      <h2><span class="dchip">Miércoles 16</span> <span class="dsub">30 sesiones · Wednesday Sep 16</span></h2>
+      <div class="cal" style="height:663px">
+        <div class="gutter"></div>
+        <div class="gl " style="top:0px"></div><div class="tl" style="top:-6px">11:30 AM</div><div class="gl maj" style="top:51px"></div><div class="tl" style="top:45px">12:00 PM</div><div class="gl " style="top:102px"></div><div class="tl" style="top:96px">12:30 PM</div><div class="gl maj" style="top:153px"></div><div class="tl" style="top:147px">1:00 PM</div><div class="gl " style="top:204px"></div><div class="tl" style="top:198px">1:30 PM</div><div class="gl maj" style="top:255px"></div><div class="tl" style="top:249px">2:00 PM</div><div class="gl " style="top:306px"></div><div class="tl" style="top:300px">2:30 PM</div><div class="gl maj" style="top:357px"></div><div class="tl" style="top:351px">3:00 PM</div><div class="gl " style="top:408px"></div><div class="tl" style="top:402px">3:30 PM</div><div class="gl maj" style="top:459px"></div><div class="tl" style="top:453px">4:00 PM</div><div class="gl " style="top:510px"></div><div class="tl" style="top:504px">4:30 PM</div><div class="gl maj" style="top:561px"></div><div class="tl" style="top:555px">5:00 PM</div><div class="gl " style="top:612px"></div><div class="tl" style="top:606px">5:30 PM</div><div class="gl maj" style="top:663px"></div><div class="tl" style="top:657px">6:00 PM</div>
+        <div class="track"><div class="ev lab" data-i="23" style="top:0px;height:150px;left:calc(62.5000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">11:30 AM–1:00 PM · <b class=st>★</b></div>
+          <div class="ett">Build Your Own AI Workflows: Hands-On with the Revit Public MCP Server</div>
+          <div class="em">[BLD1782] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="24" style="top:0px;height:150px;left:calc(75.0000% + 2px);width:calc(12.5000% - 4px);--c:#06b6d4">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">11:30 AM–1:00 PM </div>
+          <div class="ett">From Promises to Performance: Hands-On Workplan Commitments and Metrics in Autodesk Forma Build</div>
+          <div class="em">[BLD1807] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="25" style="top:0px;height:150px;left:calc(87.5000% + 2px);width:calc(12.5000% - 4px);--c:#0ea5e9">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">11:30 AM–1:00 PM </div>
+          <div class="ett">One Platform, Zero Guesswork: Seamlessly Connecting 2D and 3D Takeoff with Estimation</div>
+          <div class="em">[CS1255] · Hands-on Lab</div>
+        </div><div class="ev" data-i="26" style="top:0px;height:48px;left:calc(0.0000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">AI-Enabled Design for Excellence: Advancing Industrialized Construction from Design to Fabrication</div>
+          <div class="em">[AS1140] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="27" style="top:0px;height:48px;left:calc(12.5000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">AI Changes the Cost Curve. But Connected Data Changes Value Creation.</div>
+          <div class="em">[BES3266] · Strategy Talk</div>
+        </div><div class="ev" data-i="28" style="top:0px;height:48px;left:calc(25.0000% + 2px);width:calc(12.5000% - 4px);--c:#0ea5e9">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">Innovators Stage | Digital Twins: Hot Takes and Cold Truths</div>
+          <div class="em">[BLD3895] · Spark Session</div>
+        </div><div class="ev" data-i="29" style="top:0px;height:48px;left:calc(37.5000% + 2px);width:calc(12.5000% - 4px);--c:#06b6d4">
+          
+          <div class="et">11:30 AM–12:00 PM · <b class=st>★</b></div>
+          <div class="ett">Decision-Driven Parametric Tunnel Design Using Shared Project Data</div>
+          <div class="em">[CES1363] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="30" style="top:0px;height:48px;left:calc(50.0000% + 2px);width:calc(12.5000% - 4px);--c:#f97316">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">The Integrated Lifecycle: Connecting Design, Build, and Project Management in One Ecosystem</div>
+          <div class="em">[CS3055] · Strategy Talk</div>
+        </div><div class="ev" data-i="31" style="top:102px;height:48px;left:calc(0.0000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">Prompt to Procurement: AI Research at MIT on Closing the Render-to-Build Loop</div>
+          <div class="em">[AS3991] · Strategy Talk</div>
+        </div><div class="ev" data-i="32" style="top:102px;height:48px;left:calc(12.5000% + 2px);width:calc(12.5000% - 4px);--c:#06b6d4">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">From Disconnected Tasks to Standardized Construction Workflows: Connected by Autodesk Forma with a Database</div>
+          <div class="em">[BLD2468] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="33" style="top:102px;height:48px;left:calc(25.0000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">12:30 PM–1:00 PM · <b class=st>★</b></div>
+          <div class="ett">Dr. Claude: How I Learned to Stop Worrying and Start Loving Autodesk Platform Services</div>
+          <div class="em">[CES1635] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="34" style="top:102px;height:48px;left:calc(37.5000% + 2px);width:calc(12.5000% - 4px);--c:#06b6d4">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">Autodesk Forma Isn’t the Hard Part. Leading Through Change Is.</div>
+          <div class="em">[CS3938] · Strategy Talk</div>
+        </div><div class="ev" data-i="35" style="top:102px;height:48px;left:calc(50.0000% + 2px);width:calc(12.5000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">12:30 PM–1:00 PM · <b class=st>★</b></div>
+          <div class="ett">From Capture to AI: How Data Enrichment Unlocks the Value of Motion</div>
+          <div class="em">[FTV1750] · Strategy Talk</div>
+        </div><div class="ev" data-i="36" style="top:204px;height:99px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Vibe Coding for AECO Professionals—The Master Class</div>
+          <div class="em">[AS1622] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="37" style="top:204px;height:99px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#0ea5e9">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Industrialized Construction Summit | Industrialized Construction: What Will It Take to Reach the Tipping Point?</div>
+          <div class="em">[AS2611] · Strategy Talk</div>
+        </div><div class="ev" data-i="38" style="top:204px;height:99px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">From 2D to Digital Twin: Connecting Design to Operations in Retail Lifecycle with BIM, IoT, and AI</div>
+          <div class="em">[AU2467] · Strategy Talk</div>
+        </div><div class="ev" data-i="39" style="top:204px;height:99px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Feature, Add-In, or AI? Should You Buy, Build, or Hack in 2026?</div>
+          <div class="em">[BLD2359] · Strategy Talk</div>
+        </div><div class="ev" data-i="40" style="top:204px;height:99px;left:calc(66.6667% + 2px);width:calc(16.6667% - 4px);--c:#f97316">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Schedules That Talk: Connecting Data, Lean Planning, and Project Decisions</div>
+          <div class="em">[CS1346] · Strategy Talk</div>
+        </div><div class="ev" data-i="41" style="top:204px;height:99px;left:calc(83.3333% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          
+          <div class="et">1:30 PM–2:30 PM </div>
+          <div class="ett">Bridging the Field-to-Office Gap: Centralizing Workflows in Autodesk Forma</div>
+          <div class="em">[CS1415] · Strategy Talk</div>
+        </div><div class="ev" data-i="42" style="top:357px;height:99px;left:calc(0.0000% + 2px);width:calc(20.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–4:00 PM · <b class=st>★</b></div>
+          <div class="ett">AI-Ready BIM Foundation: Push-Button Cross-Discipline Automation with Revit MCP, Dynamo, and pyRevit</div>
+          <div class="em">[AS2564] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="43" style="top:357px;height:99px;left:calc(20.0000% + 2px);width:calc(20.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–4:00 PM </div>
+          <div class="ett">Sustainability and AI in Practice: Driving Better Outcomes with Connected Data, Workflows and Tools</div>
+          <div class="em">[AS2784] · Meetup</div>
+        </div><div class="ev" data-i="44" style="top:357px;height:99px;left:calc(40.0000% + 2px);width:calc(20.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">3:00 PM–4:00 PM · <b class=st>★★</b></div>
+          <div class="ett">Autodesk Forma to Energy: AI-Powered Workflows for Carbon Insight</div>
+          <div class="em">[AS2841] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="45" style="top:357px;height:99px;left:calc(60.0000% + 2px);width:calc(20.0000% - 4px);--c:#06b6d4">
+          
+          <div class="et">3:00 PM–4:00 PM </div>
+          <div class="ett">No More “BIM Guy”: Driving Real Digital Transformation Across Construction</div>
+          <div class="em">[BLD3677] · Strategy Talk</div>
+        </div><div class="ev" data-i="46" style="top:357px;height:99px;left:calc(80.0000% + 2px);width:calc(20.0000% - 4px);--c:#6366f1">
+          
+          <div class="et">3:00 PM–4:00 PM · <b class=st>★</b></div>
+          <div class="ett">Design Fast, Validate Smart: Extending InfoDrainage with Parametric Workflows in Civil 3D and InfoWorks ICM</div>
+          <div class="em">[CES1592] · Strategy Talk</div>
+        </div><div class="ev" data-i="47" style="top:510px;height:99px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">Beyond Design: The Evolving Role of Architects and Engineers in the Age of AI</div>
+          <div class="em">[AS1540] · Strategy Talk</div>
+        </div><div class="ev" data-i="48" style="top:510px;height:99px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">Beyond Tool Adoption: Orchestrating Change with Autodesk Forma</div>
+          <div class="em">[BLD4106] · Strategy Talk</div>
+        </div><div class="ev" data-i="49" style="top:510px;height:99px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#6366f1">
+          
+          <div class="et">4:30 PM–5:30 PM · <b class=st>★</b></div>
+          <div class="ett">Generative Design for Smart Catenary Systems Using Adaptive Parametric Families</div>
+          <div class="em">[CES1467] · Technical Deep Dive</div>
+        </div><div class="ev lab" data-i="50" style="top:510px;height:150px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#06b6d4">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">4:30 PM–6:00 PM · <b class=st>★</b></div>
+          <div class="ett">Electrical Analytical Systems and Loads</div>
+          <div class="em">[BES2205] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="51" style="top:510px;height:150px;left:calc(66.6667% + 2px);width:calc(16.6667% - 4px);--c:#f97316">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">4:30 PM–6:00 PM </div>
+          <div class="ett">Integrating Structural Analysis Workflows in BIM with Revit</div>
+          <div class="em">[BLD3450] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="52" style="top:510px;height:150px;left:calc(83.3333% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">4:30 PM–6:00 PM </div>
+          <div class="ett">AI-Assisted AutoLISP in AutoCAD: A Practical Workflow for Nonprogrammers</div>
+          <div class="em">[CES1584] · Hands-on Lab</div>
+        </div></div>
+      </div>
+    </section><section class="day">
+      <h2><span class="dchip">Jueves 17</span> <span class="dsub">22 sesiones · Thursday Sep 17</span></h2>
+      <div class="cal" style="height:918px">
+        <div class="gutter"></div>
+        <div class="gl " style="top:0px"></div><div class="tl" style="top:-6px">8:30 AM</div><div class="gl maj" style="top:51px"></div><div class="tl" style="top:45px">9:00 AM</div><div class="gl " style="top:102px"></div><div class="tl" style="top:96px">9:30 AM</div><div class="gl maj" style="top:153px"></div><div class="tl" style="top:147px">10:00 AM</div><div class="gl " style="top:204px"></div><div class="tl" style="top:198px">10:30 AM</div><div class="gl maj" style="top:255px"></div><div class="tl" style="top:249px">11:00 AM</div><div class="gl " style="top:306px"></div><div class="tl" style="top:300px">11:30 AM</div><div class="gl maj" style="top:357px"></div><div class="tl" style="top:351px">12:00 PM</div><div class="gl " style="top:408px"></div><div class="tl" style="top:402px">12:30 PM</div><div class="gl maj" style="top:459px"></div><div class="tl" style="top:453px">1:00 PM</div><div class="gl " style="top:510px"></div><div class="tl" style="top:504px">1:30 PM</div><div class="gl maj" style="top:561px"></div><div class="tl" style="top:555px">2:00 PM</div><div class="gl " style="top:612px"></div><div class="tl" style="top:606px">2:30 PM</div><div class="gl maj" style="top:663px"></div><div class="tl" style="top:657px">3:00 PM</div><div class="gl " style="top:714px"></div><div class="tl" style="top:708px">3:30 PM</div><div class="gl maj" style="top:765px"></div><div class="tl" style="top:759px">4:00 PM</div><div class="gl " style="top:816px"></div><div class="tl" style="top:810px">4:30 PM</div><div class="gl maj" style="top:867px"></div><div class="tl" style="top:861px">5:00 PM</div><div class="gl " style="top:918px"></div><div class="tl" style="top:912px">5:30 PM</div>
+        <div class="track"><div class="ev lab" data-i="53" style="top:0px;height:150px;left:calc(66.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">8:30 AM–10:00 AM </div>
+          <div class="ett">I Shall Call You C3PO: A Guide to Using Autodesk Assistant for Revit As Your Production Sidekick</div>
+          <div class="em">[AS3533] · Hands-on Lab</div>
+        </div><div class="ev lab" data-i="54" style="top:0px;height:150px;left:calc(83.3333% + 2px);width:calc(16.6667% - 4px);--c:#6366f1">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">8:30 AM–10:00 AM · <b class=st>★</b></div>
+          <div class="ett">Design Like a Rocket Scientist: Generative Design Versus Topology Optimization in Autodesk Fusion</div>
+          <div class="em">[DE2335] · Hands-on Lab</div>
+        </div><div class="ev" data-i="55" style="top:0px;height:99px;left:calc(0.0000% + 2px);width:calc(16.6667% - 4px);--c:#f97316">
+          
+          <div class="et">8:30 AM–9:30 AM </div>
+          <div class="ett">Structural Engineering at the Core: Integrated Digital Delivery at Foster + Partners</div>
+          <div class="em">[AS3415] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="56" style="top:0px;height:99px;left:calc(16.6667% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">8:30 AM–9:30 AM · <b class=st>★</b></div>
+          <div class="ett">No More Blind Spots: Autodesk MCP Driving AI Across Multi-CDE Platform Projects</div>
+          <div class="em">[BES1427] · Strategy Talk</div>
+        </div><div class="ev" data-i="57" style="top:0px;height:99px;left:calc(33.3333% + 2px);width:calc(16.6667% - 4px);--c:#8b5cf6">
+          
+          <div class="et">8:30 AM–9:30 AM </div>
+          <div class="ett">Automation API: The Execution Engine for Autodesk at Scale</div>
+          <div class="em">[BES2010] · Strategy Talk</div>
+        </div><div class="ev" data-i="58" style="top:0px;height:99px;left:calc(50.0000% + 2px);width:calc(16.6667% - 4px);--c:#f97316">
+          
+          <div class="et">8:30 AM–9:30 AM </div>
+          <div class="ett">From Content to Control: Structuring MEP BIM Production with Content Catalog</div>
+          <div class="em">[BES3302] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="59" style="top:153px;height:48px;left:calc(0.0000% + 2px);width:calc(14.2857% - 4px);--c:#22c55e">
+          
+          <div class="et">10:00 AM–10:30 AM · <b class=st>★★</b></div>
+          <div class="ett">From Sustainability Intent to Spatial Decisions: Integrating Environmental Performance into Autodesk Forma</div>
+          <div class="em">[AS2133] · Strategy Talk</div>
+        </div><div class="ev" data-i="60" style="top:153px;height:99px;left:calc(14.2857% + 2px);width:calc(14.2857% - 4px);--c:#f97316">
+          
+          <div class="et">10:00 AM–11:00 AM </div>
+          <div class="ett">Reality Capture Now and Next: The Power of Point Clouds and Mesh Modeling</div>
+          <div class="em">[AS2842] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="61" style="top:153px;height:99px;left:calc(28.5714% + 2px);width:calc(14.2857% - 4px);--c:#8b5cf6">
+          
+          <div class="et">10:00 AM–11:00 AM </div>
+          <div class="ett">Collaborative Multi-Agents for AEC: A New Way to Navigate Design Decisions</div>
+          <div class="em">[AS3860] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="62" style="top:153px;height:99px;left:calc(42.8571% + 2px);width:calc(14.2857% - 4px);--c:#8b5cf6">
+          
+          <div class="et">10:00 AM–11:00 AM </div>
+          <div class="ett">Turning BIM into AI-Powered Digital Twins: Real-Time Predictive Maintenance with IoT</div>
+          <div class="em">[CES2101] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="63" style="top:153px;height:99px;left:calc(57.1429% + 2px);width:calc(14.2857% - 4px);--c:#06b6d4">
+          
+          <div class="et">10:00 AM–11:00 AM · <b class=st>★</b></div>
+          <div class="ett">Using Autodesk Forma Build and Autodesk Forma Assets for Heritage Rehabilitation</div>
+          <div class="em">[CS1583] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="64" style="top:153px;height:99px;left:calc(71.4286% + 2px);width:calc(14.2857% - 4px);--c:#8b5cf6">
+          
+          <div class="et">10:00 AM–11:00 AM </div>
+          <div class="ett">An Agentic Future-State of Embedded Certainty Through Autodesk Forma, Informed Design, and KOPE</div>
+          <div class="em">[CS3291] · Strategy Talk</div>
+        </div><div class="ev" data-i="65" style="top:153px;height:99px;left:calc(85.7143% + 2px);width:calc(14.2857% - 4px);--c:#22c55e">
+          
+          <div class="et">10:00 AM–11:00 AM · <b class=st>★★</b></div>
+          <div class="ett">A New Era for Stadium Design and Construction: Huntington Bank Field</div>
+          <div class="em">[CS3777] · Strategy Talk</div>
+        </div><div class="ev" data-i="66" style="top:255px;height:150px;left:calc(0.0000% + 2px);width:calc(20.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">11:00 AM–12:30 PM · <b class=st>★</b></div>
+          <div class="ett">Forma CS Summit l The Forma AI &amp; APIs Roundtable: Connected Data, AI, and Business Transformation</div>
+          <div class="em">[4513] · Strategy Talk</div>
+        </div><div class="ev lab" data-i="67" style="top:255px;height:150px;left:calc(20.0000% + 2px);width:calc(20.0000% - 4px);--c:#ec4899">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">11:00 AM–12:30 PM · <b class=st>★</b></div>
+          <div class="ett">From 2D Layout to 3D Simulation: A Digital Factory Hands-On Lab</div>
+          <div class="em">[MFG2754] · Hands-on Lab</div>
+        </div><div class="ev" data-i="68" style="top:306px;height:48px;left:calc(40.0000% + 2px);width:calc(20.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">Do You Trust Me? Building Trustworthy AI for Design and Engineering Workflows.</div>
+          <div class="em">[AU4178] · Strategy Talk</div>
+        </div><div class="ev" data-i="69" style="top:306px;height:48px;left:calc(60.0000% + 2px);width:calc(20.0000% - 4px);--c:#06b6d4">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">Integration Workflows in a Stadium—Autodesk Forma As a Communication Bridge</div>
+          <div class="em">[CS2889] · Strategy Talk</div>
+        </div><div class="ev" data-i="70" style="top:306px;height:48px;left:calc(80.0000% + 2px);width:calc(20.0000% - 4px);--c:#06b6d4">
+          
+          <div class="et">11:30 AM–12:00 PM </div>
+          <div class="ett">Modular Data Center: Innovation and Performance with a Connected Workflow Powered by Autodesk</div>
+          <div class="em">[FAB3248] · Technical Deep Dive</div>
+        </div><div class="ev" data-i="71" style="top:357px;height:48px;left:calc(40.0000% + 2px);width:calc(20.0000% - 4px);--c:#22c55e">
+          
+          <div class="et">12:00 PM–12:30 PM </div>
+          <div class="ett">AEC Roadmap: Structures</div>
+          <div class="em">[CES3469] · Roadmap</div>
+        </div><div class="ev" data-i="72" style="top:408px;height:48px;left:calc(0.0000% + 2px);width:calc(100.0000% - 4px);--c:#8b5cf6">
+          
+          <div class="et">12:30 PM–1:00 PM </div>
+          <div class="ett">Industrialized Construction at Scale: Data-Driven Sustainability for Modular Systems</div>
+          <div class="em">[CS3468] · Strategy Talk</div>
+        </div><div class="ev lab" data-i="73" style="top:510px;height:150px;left:calc(0.0000% + 2px);width:calc(100.0000% - 4px);--c:#6366f1">
+          <div class="labbadge">🧪 HANDS-ON LAB</div>
+          <div class="et">1:30 PM–3:00 PM · <b class=st>★</b></div>
+          <div class="ett">Turning Curtain Walls into Configurable Products with Revit, Dynamo, and Informed Design</div>
+          <div class="em">[FAB1935] · Hands-on Lab</div>
+        </div><div class="ev" data-i="74" style="top:816px;height:99px;left:calc(0.0000% + 2px);width:calc(100.0000% - 4px);--c:#ec4899">
+          
+          <div class="et">4:30 PM–5:30 PM </div>
+          <div class="ett">From Sketch to Toolpath: Reducing Design-to-Manufacturing Time Using Connected Autodesk Workflows</div>
+          <div class="em">[MFG3075] · Technical Deep Dive</div>
+        </div></div>
+      </div>
+    </section>
+</main>
+<div class="ov" id="ov">
+  <div class="modal" id="modal"></div>
+</div>
+<script>
+const SESS=[{"titulo": "Autodesk Tandem Connect in Action: Integrate Systems, Trigger Workflows, Drive Operations", "code": "BLD1522", "formato": "Hands-on Lab", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "1:00 PM", "day": "Martes 15", "st": "★★", "desc": "In this hands-on session, explore how Autodesk Tandem Connect enables truly operational digital twins by integrating real-time data with building assets. Participants will connect external systems, visualize performance through heat maps,...  Derek Milz , Customer Adoption Specialist, Autodesk", "lab": true}, {"titulo": "From Model to Diagram: Automating Electrical One-Line Generation in Revit", "code": "BES1043", "formato": "Technical Deep Dive", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Martes 15", "st": "", "desc": "Clear diagrams are critical for translating MEP designs into something contractors can build in the field. However, creating those diagrams is often a slow, manual process—drawing connection lines, placing detail items, and constantly checking the...  Zach Bratcher , Technology Designer, DBR Engineering", "lab": false}, {"titulo": "Design Requirements Verification with BIM Automation and AI Agents", "code": "BLD3171", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Martes 15", "st": "★", "desc": "Venetian, Veronese 2403, level 2 Verifying that a building meets project requirements - room sizing, adjacencies, equipment, performance - is still largely manual. This session presents a pipeline automating design requirements verification on BIM models. Rule-based engines...  Alexandre HERSANT , Product Owner, Egis Benattia Abdelhakim , BIM Developer, Egis", "lab": false}, {"titulo": "Design Once, Use Forever: Automating Civil 3D Asset Data for Operations", "code": "CES3746", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Martes 15", "st": "★", "desc": "As owners and operators increasingly rely on digital twins, geographic information systems (GIS), and asset management platforms, expectations for consistent, accurate, and information‑rich civil deliverables continue to rise. Yet many Civil 3D...  Jelber Prado , BIM Manager | Infrastructure, Houston Airport System George Cernetig , Sr. VDC Specialist, HNTB", "lab": false}, {"titulo": "Using Autodesk Forma Takeoff for Carbon Offset and Sustainability Requirements", "code": "CS1256", "formato": "Technical Deep Dive", "tema": "Sostenibilidad & Rendimiento", "col": "#22c55e", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Martes 15", "st": "★★", "desc": "As more projects are being mandated to demonstrate reduced carbon impact during construction, managing contractors are now tasked with finding solutions to easily calculate and track the change in materials that affect Green Star ratings for their...  Nathan Love , Construction BIM Manager, Multiplex Adam Sheather , Sr Principal, Solution Architect – APAC Lead Technical Advisory, Autodesk", "lab": false}, {"titulo": "Rule-Driven Building Design: Connecting Structural Analysis, Autodesk Forma, and Informed Design", "code": "FAB2066", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Martes 15", "st": "", "desc": "Learn how to automate decision making in type 5 designs by connecting structural analysis, product data, and off-site construction workflows across the Autodesk platform. This class will demonstrate how to integrate a Structural Analysis Design...  steve dewitt , Owner, Custom Building Configurators Kelly Justin Wilson , Owner, SADE", "lab": false}, {"titulo": "Data Center Design Automation: A New Paradigm for Feasibility and Early Design", "code": "BLD4108", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Martes 15", "st": "", "desc": "Data center projects must move faster while managing increasing complexity in power, cooling, and cost. Traditional feasibility workflows are fragmented and slow, limiting iteration and delaying decisions. This session presents a new approach...  Nuno Mourao , Chief Software Architect, Podium.io", "lab": false}, {"titulo": "AutoCAD Electrical Meets Vibe Coding: Building a Complex Dashboard Without DAX/M Expertise", "code": "CES1396", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Martes 15", "st": "", "desc": "Turn messy AutoCAD Electrical data into a working dashboard—without deep Data Analysis Expressions (DAX) or Power Query expertise. This session will reveal a real-world journey using “vibe coding”: iterative problem-solving with AI, trial and...  Shinu Mathew , Principal Business Consultant, Autodesk", "lab": false}, {"titulo": "From Pilot to Competitive Advantage: Scaling Generative Design with Autodesk Forma and Infraspace", "code": "CES2548", "formato": "Strategy Talk", "tema": "Sostenibilidad & Rendimiento", "col": "#22c55e", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Martes 15", "st": "★★", "desc": "Infrastructure projects face increasing demands for faster delivery, lower costs, and more sustainable outcomes. Meeting these demands requires teams to work smarter, deliver higher-quality designs, and make better decisions within tight...  Andreas Bjune Kjølseth , Founder & CEO, Infraspace Kristoffer Spendrup Bugge , Digital Transformation Leader, Norconsult", "lab": false}, {"titulo": "Building Custom AEC Apps in Minutes: AI-Assisted Development with FORMA and VIKTOR.AI", "code": "BES1377", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Martes 15", "st": "", "desc": "Design teams increasingly need trusted workflows that connect Autodesk Forma, Autodesk Platform Services (APS), agentic AI, engineering tools, proprietary company knowledge, and cloud automation to solve real project challenges. This session...  Peter Madlener , CEO, VIKTOR Jordana Rosa , Autodesk", "lab": false}, {"titulo": "Shift to Next-Generation Construction: From Connected Processes to Predictive Decision Making", "code": "BLD2378", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Martes 15", "st": "", "desc": "During construction, fragmented information and decision making across multiple teams remain a major challenge. At Daiwa House, Autodesk Forma projects are launched across more than 400 design and construction projects each year, supporting...  Yoshinori Shimizu , Chief, Daiwa House Industry Co., Ltd. Takuya Ogawa , Senior Customer Success Manager, Autodesk Yui 維 , Chief, Daiwa House Industry Co., Ltd.", "lab": false}, {"titulo": "​From Chaos to Control: Model Coordination in Autodesk Forma and API Strategies for Infrastructure Projects", "code": "CES1044", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Martes 15", "st": "★", "desc": "In large-scale infrastructure, \"coordination chaos\" is a common reality. When teams use different tools and inconsistent methods, design mistakes are often caught too late. This leads to expensive rework, missed deadlines, and increased project...  Adrian Fernandez Sanchez , Product Owner Autodesk Transport, Rambøll Norge Maria Albízuri , Sr Implementation Consultant, Autodesk", "lab": false}, {"titulo": "Why AI Struggles in Real-World Making—And How to Make It Work", "code": "MFG3902", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Martes 15", "st": "★", "desc": "AI has transformed design and simulation, yet its role in real-world making—where materials, tolerances, and human judgment converge—remains emergent. Fabrication is variable, unforgiving, and governed by physics that challenge AI tools. This...  Adam Allard , Senior Manager, Technical Environments, Autodesk", "lab": false}, {"titulo": "Pipe Design in InfoWorks ICM: Penalty Configuration and Automatic Constraint Relaxation", "code": "BES2113", "formato": "Hands-on Lab", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "2:00 PM", "hfin": "3:30 PM", "day": "Martes 15", "st": "", "desc": "This hands-on lab will teach you the practical use of the InfoWorks ICM Network Design logic for both stormwater and sanitary networks. Through guided exercises, you’ll configure design constraints, explore the new penalty configuration parameters...  Samer Muhandes , Senior Product Management Engineer/Mgr, Autodesk Ahmed Elsayed , Technical Specialist, Water, Autodesk", "lab": true}, {"titulo": "Design-Driven Reinforcement in Revit: From Analysis Results to Automated Rebar and Documentation", "code": "BLD2116", "formato": "Hands-on Lab", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "2:00 PM", "hfin": "3:30 PM", "day": "Martes 15", "st": "", "desc": "Revit software is evolving into a design-driven environment for structural engineers, enabling a seamless transition from analysis to reinforcement and documentation. In this hands-on session, you’ll integrate results from FEM software—such as...  Stevens Chemise , Product Manager, Graitec Innovation", "lab": true}, {"titulo": "Preparing Construction Data for AI", "code": "CS2111", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "3:30 PM", "day": "Martes 15", "st": "", "desc": "Everyone wants AI in construction. Almost no one has data ready for it. Poor structure, inconsistent metadata, and fragmented workflows hold most teams back. This session will share real-world lessons from Stowe Australia, implementing Autodesk...  Matthew Fern , National Digital Engineering Manager, Stowe Australia", "lab": false}, {"titulo": "From Massing to Metrics: Integrating Autodesk Forma and Autodesk Forma Carbon Insights for Outcome-Based Design", "code": "AS1983", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Martes 15", "st": "★", "desc": "Around 80% of a building’s environmental impact is determined in the first 20% of design, yet this phase often relies on intuition rather than data. This presentation will introduce GHD’s outcome-based workflow that embeds predictive AI and cloud...  Michael Sturm , Principal Implementation Consultant, Autodesk Jessica Carson , Architect, GHD Design Isaac McCormack , Architect, GHD Design", "lab": false}, {"titulo": "Create Your Own AI Assistant That Interacts with Revit and Other Programs at the Same Time", "code": "BLD2228", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Martes 15", "st": "", "desc": "Current AI assistants for Revit software typically operate within a single application. This class will explore a different approach by creating a custom AI assistant that can interact with Revit and other programs simultaneously using a Model...  Marcello Sgambelluri , Director of Advanced Design Technology, AG&E", "lab": false}, {"titulo": "Perfect Quality Control with Autodesk Forma Construction Connect: How Integrated Data Delivers a 45% Workload Reduction", "code": "CS1840", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Martes 15", "st": "", "desc": "This session will present a practical case in which Autodesk Forma (formerly Autodesk Construction Cloud) connects project data across design, preconstruction, procurement, cost, and construction workflows. Traditionally, inspections required...  Hideaki Takimoto , Senior Manager, TAKENAKA Corporation", "lab": false}, {"titulo": "Go Slow to Go Fast: Dome Construction’s Real-World", "code": "CS1767", "formato": "Roadmap", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "4:00 PM", "hfin": "5:00 PM", "day": "Martes 15", "st": "", "desc": "Dome Construction's transition to Forma Build wasn't planned; it was driven by clients. As owners across Life Sciences, Technology, and Foodtech began requiring Autodesk Build, the question quickly shifted from if to how fast. Leadership set a...  John Mack , Construction Technology Consultant, Dome Construction Jason Dodds , Principal Business Consultant, Construction, CDE & Data Strategy, Autodesk", "lab": false}, {"titulo": "Files to Intelligence: An Autodesk Platform Services-Governed MEP Automation Ecosystem", "code": "BLD2290", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Martes 15", "st": "", "desc": "MEP design data is trapped in files—QA is manual, cross-discipline sync is fragmented, and governance is absent. At AECOM MEA, a mechanical engineer who codes built a 26-tool digital ecosystem spanning the Revit API, Autodesk Platform Services,...  Sherif Elhntaty , Associate Director - Digital & Buildings, AECOM", "lab": false}, {"titulo": "Cracking the Code: Automating Block Editor Workflows with DocumentManager CommandAsync", "code": "CES1589", "formato": "Technical Deep Dive", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Martes 15", "st": "", "desc": "Thirty-seven offices and seven unique borders. Discover how to eliminate hours of repetitive tasks by using AutoCAD software’s DocumentManager and asynchronous command execution to automate Block Editor operations. This session will demonstrate...  Scott Mizsak , CAD Coordinator, Bolton & Menk", "lab": false}, {"titulo": "Reliable Techniques for Complex Drawings and Detailing in Inventor", "code": "IM1095", "formato": "Technical Deep Dive", "tema": "Industrializado & Fabricación", "col": "#ec4899", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Martes 15", "st": "", "desc": "You update your Inventor model and suddenly your drawing is a complete mess! Your views, sections, and details have moved all over the sheet, and your dimensions are pink with confusion! (This always seems to happen at 4 PM on a Friday.) In...  Paul Munford , Principal Technical Onboarding Architect - D&M, Autodesk", "lab": false}, {"titulo": "Build Your Own AI Workflows: Hands-On with the Revit Public MCP Server", "code": "BLD1782", "formato": "Hands-on Lab", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:30 AM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "★", "desc": "In this hands-on workshop, you’ll learn how to use the Revit Public MCP (Model Context Protocol) server to access Revit capabilities from a large language model (LLM) of your choice, and orchestrate workflows across tools, data, and services. The...  Harlan Brumm , Director, Product Management, Revit Core Capabilities & Collaboration Services, Autodesk", "lab": true}, {"titulo": "From Promises to Performance: Hands-On Workplan Commitments and Metrics in Autodesk Forma Build", "code": "BLD1807", "formato": "Hands-on Lab", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "", "desc": "Construction teams often struggle to translate high-level schedules into reliable short-term execution. While master schedules define what should happen, they rarely capture what actually gets done on-site. In this hands-on lab, you will explore...  Dhruvesh Shah , Principal Technical Adoption Specialist, Autodesk", "lab": true}, {"titulo": "One Platform, Zero Guesswork: Seamlessly Connecting 2D and 3D Takeoff with Estimation", "code": "CS1255", "formato": "Hands-on Lab", "tema": "Datos, Cloud & Digital Twins", "col": "#0ea5e9", "hini": "11:30 AM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "", "desc": "A recent QuickBooks survey found that one in four construction companies risk closure if they make two or three inaccurate estimates. The estimation inaccuracy is caused by the complexity of 2D and 3D data and the frequent updates to bid packages....  Deepak Maini , Principal Business Consultant, Autodesk", "lab": true}, {"titulo": "AI-Enabled Design for Excellence: Advancing Industrialized Construction from Design to Fabrication", "code": "AS1140", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Miércoles 16", "st": "", "desc": "This session introduces a next-generation design for excellence (DfX) framework for industrialized construction, which combines design for manufacturing, assembly, disassembly, and sustainability into an AI-enabled decision-making system. This...  Karla Saldana , Assistant Professor, University of Florida", "lab": false}, {"titulo": "AI Changes the Cost Curve. But Connected Data Changes Value Creation.", "code": "BES3266", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Miércoles 16", "st": "", "desc": "AI is often discussed in terms of efficiency, but the bigger shift may be how connected data improves the quality, consistency, and usefulness of expert delivery. This session will share Norconsult’s perspective on how AI and connected data are...  Marius Jablonskis , Digital Transformation Leader, Norconsult ASA", "lab": false}, {"titulo": "Innovators Stage | Digital Twins: Hot Takes and Cold Truths", "code": "BLD3895", "formato": "Spark Session", "tema": "Datos, Cloud & Digital Twins", "col": "#0ea5e9", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Miércoles 16", "st": "", "desc": "The audience for this session will be polled beforehand on digital twin hot takes and cold truths. Based on the results, former virtual design and construction (VDC) professionals working in the digital twin technology space will share a hot take...  Iria Carreira , Senior Product Manager, Autodesk Karina Cardenas , Customer Adoption Specialist, Autodesk", "lab": false}, {"titulo": "Decision-Driven Parametric Tunnel Design Using Shared Project Data", "code": "CES1363", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Miércoles 16", "st": "★", "desc": "Many tunnel projects rely on static design approaches that limit the ability of stakeholders to anticipate construction risks and adapt to evolving constraints. This session will present a decision-driven parametric design approach for tunnel and...  Mikhail Semenenko , BIM Manager, Bouygues Construction Nicolas Rageul , Digital Transformation Leader, Bouygues TP", "lab": false}, {"titulo": "The Integrated Lifecycle: Connecting Design, Build, and Project Management in One Ecosystem", "code": "CS3055", "formato": "Strategy Talk", "tema": "BIM & Revit", "col": "#f97316", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Miércoles 16", "st": "", "desc": "BIM data should not remain confined to the design desk. This session explores the end-to-end workflow in Cevahir Proje’s large-scale projects using Autodesk Revit and Autodesk Construction Cloud. We demonstrate how models developed to LOD 350–500...  Melike Çatak , BIM Manager, Cevahir Proje Mimarlık Ticaret A.Ş.", "lab": false}, {"titulo": "Prompt to Procurement: AI Research at MIT on Closing the Render-to-Build Loop", "code": "AS3991", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "", "desc": "Architects and BIM teams are generating AI images faster than ever. But outputs rarely connect back to real materials, specifications, or fabrication. This session will draw on three MIT Architecture and Computer Science and Artificial...  Richa Gupta , Researcher and Forward Deployed Engineer, Massachusetts Institute of Technology |Nomic", "lab": false}, {"titulo": "From Disconnected Tasks to Standardized Construction Workflows: Connected by Autodesk Forma with a Database", "code": "BLD2468", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "", "desc": "Construction work often struggles not because information is missing, but because tasks, people, and decisions remain disconnected. Has the push for accurate data increased input and broken workflows? This isn’t anyone’s fault. It happens when...  Saori Sakurai , Project Manager, Shimizu Corporation", "lab": false}, {"titulo": "Dr. Claude: How I Learned to Stop Worrying and Start Loving Autodesk Platform Services", "code": "CES1635", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "★", "desc": "This is a tale from a BIM manager’s foray into vibe coding—going from having no coding experience to building web applications that tap into the Autodesk Platform Services APIs to supercharge the capabilities of our Autodesk Forma-based CAD...  Winston Pagliaro , Civil Infrastructure BIM and VDC Specialist, HNTB", "lab": false}, {"titulo": "Autodesk Forma Isn’t the Hard Part. Leading Through Change Is.", "code": "CS3938", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "", "desc": "Implementation of Autodesk Forma (formerly Autodesk Construction Cloud) is often treated as the finish line, when it’s only the starting point. The real challenge is leading through continuous change—balancing field needs, data, and evolving...  Lil Magallanes , Construction Technology Program Manager, DPR Construction", "lab": false}, {"titulo": "From Capture to AI: How Data Enrichment Unlocks the Value of Motion", "code": "FTV1750", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Miércoles 16", "st": "★", "desc": "AI-powered animation is only as good as the data behind it, but most motion data wasn’t designed for AI. In this session, we’ll demonstrate a projection-mapped capture app that guides performers in real time to produce more-structured motion...  Olivier Zurcher , Animation Researcher (Technical Animator), Autodesk Larasika Nadela , Machine Learning Developer, Autodesk", "lab": false}, {"titulo": "Vibe Coding for AECO Professionals—The Master Class", "code": "AS1622", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "This comprehensive 90-minute presentation will cover the entire vibe-coding landscape for architecture, engineering, construction, and owner (AECO) professionals. We’ll provide platform-agnostic coverage of AI-powered development tools, prompt...  Charles Berteaux , VDC/Tech Manager, SSOE Group", "lab": false}, {"titulo": "Industrialized Construction Summit | Industrialized Construction: What Will It Take to Reach the Tipping Point?", "code": "AS2611", "formato": "Strategy Talk", "tema": "Datos, Cloud & Digital Twins", "col": "#0ea5e9", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "Industrialized construction is widely discussed but unevenly implemented. This panel will bring together perspectives from research, technology, academia, and industry to examine what it will take to scale prefabrication, productization, and...  Donna Laquidara-Carr , Industry Insights Research Director, Dodge Construction Network Ray Boff , National Prefab Leader, DPR Construction Paul Drayton , Head of Digital, Laing O'Rourke Martin Fischer , Professor, Center for Integrated Facility Engineering (CIFE), Stanford University Az Jasat , Dir., Strategic Planning/Analytics, Autodesk", "lab": false}, {"titulo": "From 2D to Digital Twin: Connecting Design to Operations in Retail Lifecycle with BIM, IoT, and AI", "code": "AU2467", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "Retail construction still relies heavily on fragmented 2D documentation, creating a disconnect between design, construction, and operations. This session will explore how EssilorLuxottica is transforming that model by converting 2D assets into...  Enrico Trovato , Head of AECO Automation & Intelligence, EssilorLuxottica", "lab": false}, {"titulo": "Feature, Add-In, or AI? Should You Buy, Build, or Hack in 2026?", "code": "BLD2359", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "AI is changing how work gets done in architecture, engineering, construction, and operations (AECO), but it’s also complicating the path forward. Do you wait for a feature, bolt on an add-in, or hack together an AI solution? In this panel,...  Carl Storms , Technical Success Manager, Newforma Mostafa El Ayoubi , CEO, www.orkestra.online Michael Kilkelly , Senior BIM Developer, Ulteig JT Pierson , Product Manager, Autodesk Brodi Scott , Research, Development and Innovation Manager, BIM One", "lab": false}, {"titulo": "Schedules That Talk: Connecting Data, Lean Planning, and Project Decisions", "code": "CS1346", "formato": "Strategy Talk", "tema": "BIM & Revit", "col": "#f97316", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "Most schedules don’t fail because of planning. They fail because they aren’t measured. In this session, you’ll discover how teams transform schedules into data-driven tools that improve coordination and alignment with project milestones. By...  Elizabeth Soto , BIM Manager, Grupo Hermosillo Pablo Buensuceso , VDC Manager, Grupo Hermosillo", "lab": false}, {"titulo": "Bridging the Field-to-Office Gap: Centralizing Workflows in Autodesk Forma", "code": "CS1415", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "1:30 PM", "hfin": "2:30 PM", "day": "Miércoles 16", "st": "", "desc": "Moving from decentralized PDFs and paper to a unified digital ecosystem requires more than just software—it requires a cultural shift. This session explores how the Convention Center project transformed fragmented punch lists and labor tracking...  Shree Kabra , Digital Technology Specialist, AECOM - Hunt Brandon Kisner , Quality Superintendent, Penta Building Group", "lab": false}, {"titulo": "AI-Ready BIM Foundation: Push-Button Cross-Discipline Automation with Revit MCP, Dynamo, and pyRevit", "code": "AS2564", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Miércoles 16", "st": "★", "desc": "The first days of a building project are consumed by repetitive start-up tasks across architecture and MEP teams—validating models, aligning levels and grids, creating spaces, and generating documentation. This session will show how teams can...  Mayank Sharma , Director, Virtual Design and Construction, Mazzetti Julide Bozoglu , Director of Technology, Goettsch Partners", "lab": false}, {"titulo": "Sustainability and AI in Practice: Driving Better Outcomes with Connected Data, Workflows and Tools", "code": "AS2784", "formato": "Meetup", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Miércoles 16", "st": "", "desc": "Join professionals across industries for an engaging meetup exploring how sustainability is showing up in practice today and in the future. As design, make, and operate industries face growing pressure for more traceable, verifiable outcomes,...  Emily Edelstone , Impact Growth Enablement Manager, Content & Tools, Autodesk John Locke , Sr Mgr, Research Science, Autodesk Kat Mitchell , Senior Impact Growth & Engagement Manager, Autodesk", "lab": false}, {"titulo": "Autodesk Forma to Energy: AI-Powered Workflows for Carbon Insight", "code": "AS2841", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Miércoles 16", "st": "★★", "desc": "Energy and carbon analysis often arrives too late—after key decisions have been made. Despite tools like Autodesk Forma, Revit, and Insight software, most teams rely on manual, disconnected workflows that limit iteration. This session will...  Chris Balbach , Director of R&D, Performance Systems Development of NY, LLC Tetsuya Hishida , Principal Product Owner, Autodesk Daniel Stine , Director of Design Technology, Lake Flato", "lab": false}, {"titulo": "No More “BIM Guy”: Driving Real Digital Transformation Across Construction", "code": "BLD3677", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Miércoles 16", "st": "", "desc": "\"That's the BIM guy's job.\" Whether you've heard it on a job site, in a coordination meeting, or in a boardroom, you know the gap this panel is here to close. An owner, a heavy industrial GC, a self-perform contractor, and a specialty MEP...  Prateek Shailesh Chitnis , BIM Manager, Dennis Group Morgan Drivas , VDC Manager, JTM Construction Victoria Nogueira , BIM/VDC Manager, Boyle Construction Brett Settles", "lab": false}, {"titulo": "Design Fast, Validate Smart: Extending InfoDrainage with Parametric Workflows in Civil 3D and InfoWorks ICM", "code": "CES1592", "formato": "Strategy Talk", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "3:00 PM", "hfin": "4:00 PM", "day": "Miércoles 16", "st": "★", "desc": "Early-stage drainage design prioritizes speed, using simplified assumptions to test options quickly. However, challenges such as combined sewer overflows (CSOs), flooding, biodiversity loss, and wider community outcomes are increasingly...  Pablo Souto , Global Discipline Leader - Water, Mott MacDonald Ltd Juan Aguirrebengoa , Principal Civil Engineer CEng MICE, Mott MacDonald", "lab": false}, {"titulo": "Beyond Design: The Evolving Role of Architects and Engineers in the Age of AI", "code": "AS1540", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Miércoles 16", "st": "", "desc": "Hear directly from technology leaders at some of the most innovative architectural/engineering firms (HKS Architects, PBK Architects, TYLin Group) as they share how AI is reshaping practice at scale. This panel will explore how global...  Deepika Khowal , Principal Account Executive, Enterprise, Autodesk Steve Cayea , CIO, TYLin International Lauren Collier , Chief Technology Officer, PBK Natasha Luthra , Chief Technology Officer, HKS Samuel Omans , Head of AI Growth Strategy, Autodesk", "lab": false}, {"titulo": "Beyond Tool Adoption: Orchestrating Change with Autodesk Forma", "code": "BLD4106", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Miércoles 16", "st": "", "desc": "Is adopting digital solutions and AI alone truly sufficient? This session will offer a point of view on how we scaled digital delivery across an organization of more than 5,000 engineers. As highlighted in Autodesk’s State of Design and Make,...  Arisa Takahashi , Manager, Obayashi Corporation Gen Morimoto , Archi / Data Engineer, Obayashi Corp.", "lab": false}, {"titulo": "Generative Design for Smart Catenary Systems Using Adaptive Parametric Families", "code": "CES1467", "formato": "Technical Deep Dive", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Miércoles 16", "st": "★", "desc": "Designing overhead catenary systems is highly constrained and repetitive. This session will introduce a generative workflow that automates catenary design using an advanced Revit adaptive parametric family capable of handling more than 350,000...  Ayman SALEH , BIM R&D Manager, Colas Rail", "lab": false}, {"titulo": "Electrical Analytical Systems and Loads", "code": "BES2205", "formato": "Hands-on Lab", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "4:30 PM", "hfin": "6:00 PM", "day": "Miércoles 16", "st": "★", "desc": "Electrical engineers are often forced to make major design decisions early, with limited information and rapidly changing project conditions. In this hands-on lab, you will use Revit Electrical Analytical Systems tools to create connected,...  Jacob Miller , Electrical Applications Product Owner, IMEG", "lab": true}, {"titulo": "Integrating Structural Analysis Workflows in BIM with Revit", "code": "BLD3450", "formato": "Hands-on Lab", "tema": "BIM & Revit", "col": "#f97316", "hini": "4:30 PM", "hfin": "6:00 PM", "day": "Miércoles 16", "st": "", "desc": "In this hands-on lab, you’ll learn how to create, manage, and maintain analytical models in Revit for the purpose of structural analysis, BIM coordination, and design documentation. You’ll explore how to keep analytical and physical models...  Catalin Lang , Principal Product Owner, Autodesk Konrad Ociepka , Senior Product Owner, Autodesk", "lab": true}, {"titulo": "AI-Assisted AutoLISP in AutoCAD: A Practical Workflow for Nonprogrammers", "code": "CES1584", "formato": "Hands-on Lab", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "4:30 PM", "hfin": "6:00 PM", "day": "Miércoles 16", "st": "", "desc": "Most AutoCAD users never touch AutoLISP. So many small, repetitive design tasks stay manual. This session will show how AI-assisted AutoLISP workshops helped rail engineers who have little or no coding experience build useful automations...  Fabian Raaijman , Team Lead of Rail Digital Engineering, Haskoning", "lab": true}, {"titulo": "I Shall Call You C3PO: A Guide to Using Autodesk Assistant for Revit As Your Production Sidekick", "code": "AS3533", "formato": "Hands-on Lab", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "8:30 AM", "hfin": "10:00 AM", "day": "Jueves 17", "st": "", "desc": "With today’s AI tools, science fiction truly meets reality. We can all have a handy “droid” by our side. But instead of calling it Siri, Claude, or Gemini, we can call it: C3PO! Can Autodesk Assistant for Revit tell you the odds of outrunning an...  Kimberly Fuhrman-Jones , Community Manager, Autodesk Paul Aubin , Author/Consultant, Paul F Aubin Consulting Services, Inc. Harlan Brumm , Director, Product Management, Revit Core Capabilities & Collaboration Services, Autodesk", "lab": true}, {"titulo": "Design Like a Rocket Scientist: Generative Design Versus Topology Optimization in Autodesk Fusion", "code": "DE2335", "formato": "Hands-on Lab", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "8:30 AM", "hfin": "10:00 AM", "day": "Jueves 17", "st": "★", "desc": "What’s the difference between topology optimization and generative design—and why does it matter when you're building components with strict safety factors and manufacturing requirements? In this session for both CAD beginners and pros, we’ll...  Tom Luca Reinhardt , CEO and Founder, Elara Aerospace Tobias Jäger , Co-Founder and COO, Elara Aerospace", "lab": true}, {"titulo": "Structural Engineering at the Core: Integrated Digital Delivery at Foster + Partners", "code": "AS3415", "formato": "Technical Deep Dive", "tema": "BIM & Revit", "col": "#f97316", "hini": "8:30 AM", "hfin": "9:30 AM", "day": "Jueves 17", "st": "", "desc": "By showcasing several case studies, we’ll explore how the in-house structural engineering team at Foster + Partners successfully delivers high-complexity, global projects through an integrated design approach. We’ll highlight how deep engineering...  Andrea Colombo , BIM & Design Systems Coordinator, Foster + Partners Ash Rahman , Structural BIM Lead/Manager, Foster + Partners", "lab": false}, {"titulo": "No More Blind Spots: Autodesk MCP Driving AI Across Multi-CDE Platform Projects", "code": "BES1427", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "8:30 AM", "hfin": "9:30 AM", "day": "Jueves 17", "st": "★", "desc": "On a live transport megaproject, a major infrastructure contractor recovered 37 days of lost labor and $137,000 in the first week—anchored by Autodesk Forma (formerly Autodesk Construction Cloud). Most major projects don't run on a single common...  Aaron Traylen , Utopia Digital / University of Technology Sydney", "lab": false}, {"titulo": "Automation API: The Execution Engine for Autodesk at Scale", "code": "BES2010", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "8:30 AM", "hfin": "9:30 AM", "day": "Jueves 17", "st": "", "desc": "The Automation API is evolving from a job-processing service into the execution layer for running Autodesk engine workloads at scale. This session traces that evolution, from reusable automation bundles toward flexible, agent-driven workflows,...  Rami Kuret , Product Manager, Autodesk", "lab": false}, {"titulo": "From Content to Control: Structuring MEP BIM Production with Content Catalog", "code": "BES3302", "formato": "Technical Deep Dive", "tema": "BIM & Revit", "col": "#f97316", "hini": "8:30 AM", "hfin": "9:30 AM", "day": "Jueves 17", "st": "", "desc": "Have you ever tried using Content Catalog to structure MEP content during construction stages? This session will show you how to use metadata to manage content for QA/QC and use granular search to organize it by phase and construction status...  Florencia Kossman , Job Captain MEP, ENG Valentín David , Project Manager, ENG BIM", "lab": false}, {"titulo": "From Sustainability Intent to Spatial Decisions: Integrating Environmental Performance into Autodesk Forma", "code": "AS2133", "formato": "Strategy Talk", "tema": "Sostenibilidad & Rendimiento", "col": "#22c55e", "hini": "10:00 AM", "hfin": "10:30 AM", "day": "Jueves 17", "st": "★★", "desc": "Sustainability is now a strategic requirement in construction projects—but its integration into early design decisions remains fragmented and often disconnected from spatial choices. In this session, a sustainability director will share a critical...  Armelle Langlois , Head of Sustainable Performance, VINCI Construction", "lab": false}, {"titulo": "Reality Capture Now and Next: The Power of Point Clouds and Mesh Modeling", "code": "AS2842", "formato": "Technical Deep Dive", "tema": "BIM & Revit", "col": "#f97316", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "", "desc": "Laser scanning has become indispensable for capturing existing conditions, yet getting that data into Revit efficiently remains a challenge for many firms. This class will show a proven real-world workflow—from registering point clouds in ReCap...  Olivia Morgan , BIM Specialist, SmithGroup Mike Deacon , Product Management Engineer/Mgr, Autodesk", "lab": false}, {"titulo": "Collaborative Multi-Agents for AEC: A New Way to Navigate Design Decisions", "code": "AS3860", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "", "desc": "Achieving net-zero carbon in architecture, engineering, and construction (AEC) at scale can be complex, often requiring trade-offs between cost and carbon reduction goals, as well as new design approaches and workflows. Collaborative multi-agent...  Lorenzo Villaggi , Principal Research Scientist, Autodesk Nikita Klimenko , Senior AI Research Scientist, Autodesk", "lab": false}, {"titulo": "Turning BIM into AI-Powered Digital Twins: Real-Time Predictive Maintenance with IoT", "code": "CES2101", "formato": "Technical Deep Dive", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "", "desc": "Intelligent models are often underused after design, remaining static and disconnected from real-world operations. This session will present a real-world deployment in a metropolitan rail system, where BIM is transformed into a live, AI-powered...  Beril Oytun Çetinkaya , Architect, Metro İstanbul Tolga Bozkurt , AI Digital Twin & IoT Specialist, Metro Istanbul", "lab": false}, {"titulo": "Using Autodesk Forma Build and Autodesk Forma Assets for Heritage Rehabilitation", "code": "CS1583", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "★", "desc": "The Centre Block Rehabilitation is the restoration and renovation of Canada's seat of Parliament, including the removal, repair, and reconditioning of the building’s heritage assets. Using point cloud data, Autodesk Forma Build, Revit, and Dynamo...  Andrew Macdonald , Senior VDC Manager, EllisDon Arturo Baselli Gutierrez , EllisDon (Parent Company) A PCL/EllisDon a Joint Venture Zach Lee", "lab": false}, {"titulo": "An Agentic Future-State of Embedded Certainty Through Autodesk Forma, Informed Design, and KOPE", "code": "CS3291", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "", "desc": "Discover the future of productization in Autodesk Forma. Learn how connecting Forma to KOPE and Informed Design begins to deliver on the convergence of construction and manufacturing. This session will show you how to use AI agents to translate...  David Flynn , Co-Founder, KOPE Mark Thorley , Co-Founder & CEO, KOPE", "lab": false}, {"titulo": "A New Era for Stadium Design and Construction: Huntington Bank Field", "code": "CS3777", "formato": "Strategy Talk", "tema": "Sostenibilidad & Rendimiento", "col": "#22c55e", "hini": "10:00 AM", "hfin": "11:00 AM", "day": "Jueves 17", "st": "★★", "desc": "Modern stadiums are no longer just places to watch a game. They are year-round destinations that serve as community hubs, host diverse events, and deliver exceptional fan experiences. As expectations for performance, sustainability, and...  Phil Dangerfield , Haslam Sports Group Sidharth Haksar , VP, Construction Strategy and Industry Partnerships, Autodesk", "lab": false}, {"titulo": "Forma CS Summit l The Forma AI & APIs Roundtable: Connected Data, AI, and Business Transformation", "code": "4513", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:00 AM", "hfin": "12:30 PM", "day": "Jueves 17", "st": "★", "desc": "AI is everywhere—but where is it delivering real business value? Join this interactive Forma AI & APIs Roundtable, hosted by Autodesk Customer Success, for platform owners, administrators, innovation leaders, and digital transformation teams...  Jordan McKeown , Director of Operations, Pankow Builders Jeff Wetzstein , Director of Quality, Pankow Builders", "lab": false}, {"titulo": "From 2D Layout to 3D Simulation: A Digital Factory Hands-On Lab", "code": "MFG2754", "formato": "Hands-on Lab", "tema": "Industrializado & Fabricación", "col": "#ec4899", "hini": "11:00 AM", "hfin": "12:30 PM", "day": "Jueves 17", "st": "★", "desc": "In this hands-on lab, you’ll experience a connected digital factory workflow by executing it in real time. Starting with a 2D factory layout in AutoCAD using Factory Design Utilities, you’ll convert it into a 3D model in Inventor with a single...  Dave Graves , Sr Technical Sales Specialist, Autodesk Mike jolicoeur , Sr Sales Specialist, Flexim, Autodesk Harshit Gole , Technical Sales Specialist, Autodesk", "lab": true}, {"titulo": "Do You Trust Me? Building Trustworthy AI for Design and Engineering Workflows.", "code": "AU4178", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Jueves 17", "st": "", "desc": "As AI becomes embedded in design and engineering tools, the question isn’t just what it can do—it’s whether you can trust it. This session will cover practical ways to make AI more reliable, including handling proprietary versus common design...  Ousama Lakhdar-Ghazal , Director, Trusted AI & Privacy, Autodesk Nicolas Bonnet , Head of AI Trust, Autodesk", "lab": false}, {"titulo": "Integration Workflows in a Stadium—Autodesk Forma As a Communication Bridge", "code": "CS2889", "formato": "Strategy Talk", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Jueves 17", "st": "", "desc": "GIA successfully delivered the new Oaxaca Warriors baseball stadium, covering 40,934 square meters, in just 12 months using BIM methodology and the integration of Autodesk Forma into office and field workflows. Faced with a tight 12-month...  Oscar Uriel Hernandez , BIM Specialist, GIA Mario Corona , BIM - VDC MANAGER, GIA", "lab": false}, {"titulo": "Modular Data Center: Innovation and Performance with a Connected Workflow Powered by Autodesk", "code": "FAB3248", "formato": "Technical Deep Dive", "tema": "Diseño Conceptual / Forma", "col": "#06b6d4", "hini": "11:30 AM", "hfin": "12:00 PM", "day": "Jueves 17", "st": "", "desc": "In this session, we’ll explore the challenges and strategic solutions involved in the transition of the Modular Data Center from Dassault SolidWorks to Inventor software, along with the implementation of Vault PLM software and integration with...  Carlos Silva , Mechanical Engineer, Modular Data Centers Paulo Santos , Head of Design and Manufacturing, MAPData", "lab": false}, {"titulo": "AEC Roadmap: Structures", "code": "CES3469", "formato": "Roadmap", "tema": "Sostenibilidad & Rendimiento", "col": "#22c55e", "hini": "12:00 PM", "hfin": "12:30 PM", "day": "Jueves 17", "st": "", "desc": "Structural teams across design engineering, fabrication and construction face increasing pressure to deliver safe, sustainable, and highly coordinated outcomes on tighter schedules. Designers must produce accurate, analysis-driven models that...  Dan Peticila , Principal Product Manager, Autodesk Pawel Piechnik , Director, Product Management, Structures Product Line, Autodesk Piotr Pysz , Senior Product Manager, Autodesk", "lab": false}, {"titulo": "Industrialized Construction at Scale: Data-Driven Sustainability for Modular Systems", "code": "CS3468", "formato": "Strategy Talk", "tema": "IA & Automatización", "col": "#8b5cf6", "hini": "12:30 PM", "hfin": "1:00 PM", "day": "Jueves 17", "st": "", "desc": "How can industrialized construction, intelligent data, and integrated workflows turn sustainability from a reporting burden into a scalable design strategy? In this session for architecture, engineering, and construction (AEC) leaders and delivery...  Mergim Hoti , BIM Specialist, Max Bögl Nederland B.V.", "lab": false}, {"titulo": "Turning Curtain Walls into Configurable Products with Revit, Dynamo, and Informed Design", "code": "FAB1935", "formato": "Hands-on Lab", "tema": "Computacional & Generativo", "col": "#6366f1", "hini": "1:30 PM", "hfin": "3:00 PM", "day": "Jueves 17", "st": "★", "desc": "Coordinating Revit curtain wall layouts with configurable manufactured panel units is often manual, slow, and difficult to validate at scale. In this hands-on lab, you will use custom Dynamo nodes backed by the Informed Design API to connect a...  Daniel Noviello , Customer Adoption Specialist, Autodesk", "lab": true}, {"titulo": "From Sketch to Toolpath: Reducing Design-to-Manufacturing Time Using Connected Autodesk Workflows", "code": "MFG3075", "formato": "Technical Deep Dive", "tema": "Industrializado & Fabricación", "col": "#ec4899", "hini": "4:30 PM", "hfin": "5:30 PM", "day": "Jueves 17", "st": "", "desc": "Disconnected workflows between 2D design, 3D modeling, and manufacturing often lead to delays and reduced productivity. This session will demonstrate how to connect AutoCAD, Inventor, and Autodesk Fusion software into a seamless...  Sagar G S , Technical Support Specialist, Autodesk Chaitanya Belsare , Sr Associate, Technical Sales Specialist, Autodesk", "lab": false}];
+const ov=document.getElementById('ov'), modal=document.getElementById('modal');
+function openS(i){
+  const s=SESS[i];
+  modal.innerHTML=`<button class="mclose" onclick="closeS()">✕</button>
+    <div class="mbar"></div>
+    <div class="mtop">
+      <span class="mtag"><span class="dot" style="background:${s.col}"></span>${s.tema}</span>
+      <span class="mtag" style="${s.lab?`background:${s.col};color:#fff;border-color:${s.col};font-weight:700`:''}">${s.lab?'🧪 ':''}${s.formato||'—'}</span>
+      ${s.st?`<span class="mstar">${s.st}</span>`:''}
+    </div>
+    <div class="mtitle">${esc(s.titulo)}</div>
+    <div class="mmeta">${s.day} · ${s.hini}–${s.hfin} PDT · código ${s.code}</div>
+    <div class="mdesc">${s.desc?esc(s.desc):'<i>Sin descripción en el Excel original.</i>'}</div>`;
+  ov.classList.add('on'); document.body.style.overflow='hidden';
+}
+function closeS(){ov.classList.remove('on'); document.body.style.overflow='';}
+function esc(t){return (t||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+document.querySelectorAll('.ev').forEach(e=>e.addEventListener('click',()=>openS(+e.dataset.i)));
+ov.addEventListener('click',e=>{if(e.target===ov)closeS();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeS();});
+</script>
+</body></html>
